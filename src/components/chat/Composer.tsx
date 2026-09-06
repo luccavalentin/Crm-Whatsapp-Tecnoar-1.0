@@ -228,7 +228,7 @@ export function Composer({
           type="button"
           onClick={() => void finishRecording(false)}
           title="Descartar gravação"
-          className="flex size-9 items-center justify-center rounded-xl text-muted transition-colors hover:bg-ink/[0.05] hover:text-red-600"
+          className="flex size-10 shrink-0 items-center justify-center rounded-xl text-muted transition-colors hover:bg-ink/[0.05] hover:text-red-600 sm:size-9"
         >
           <Trash2 className="size-[18px]" />
         </button>
@@ -259,7 +259,7 @@ export function Composer({
             type="button"
             onClick={onCancelReply}
             title="Cancelar resposta"
-            className="flex size-7 shrink-0 items-center justify-center self-center rounded-lg text-muted transition-colors hover:bg-ink/[0.06] hover:text-ink"
+            className="flex size-9 shrink-0 items-center justify-center self-center rounded-lg text-muted transition-colors hover:bg-ink/[0.06] hover:text-ink sm:size-7"
           >
             <X className="size-4" />
           </button>
@@ -293,7 +293,7 @@ export function Composer({
             type="button"
             onClick={() => void removeAttachment()}
             title="Remover anexo"
-            className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-ink/[0.06] hover:text-ink"
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-ink/[0.06] hover:text-ink sm:size-8"
           >
             <X className="size-4" />
           </button>
@@ -314,7 +314,7 @@ export function Composer({
           onClick={() => fileInput.current?.click()}
           title="Anexar foto, vídeo ou documento"
           aria-label="Anexar arquivo"
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg text-ink/[0.48] transition-colors hover:bg-cyan-100/60 hover:text-cyan-700 disabled:opacity-40"
+          className="flex size-10 shrink-0 items-center justify-center rounded-lg text-ink/[0.48] transition-colors hover:bg-cyan-100/60 hover:text-cyan-700 disabled:opacity-40 sm:size-9"
         >
           <Paperclip className="size-[18px]" />
         </button>
@@ -361,7 +361,7 @@ export function Composer({
             onClick={() => void startRecording()}
             title="Gravar áudio"
             aria-label="Gravar áudio"
-            className="flex size-9 shrink-0 items-center justify-center rounded-lg text-ink/[0.48] transition-colors hover:bg-orange-100/70 hover:text-orange-600 disabled:opacity-40"
+            className="flex size-10 shrink-0 items-center justify-center rounded-lg text-ink/[0.48] transition-colors hover:bg-orange-100/70 hover:text-orange-600 disabled:opacity-40 sm:size-9"
           >
             <Mic className="size-[18px]" />
           </button>

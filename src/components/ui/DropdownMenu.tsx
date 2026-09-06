@@ -68,7 +68,9 @@ export function DropdownMenu({
         item.onClick()
       }}
       className={cn(
-        'flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition-colors',
+        // py-2.5 (em vez de py-2) aproxima o alvo de toque de 40px, o mínimo
+        // confortável para tocar sem errar o item vizinho no celular.
+        'flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2.5 text-left text-sm transition-colors',
         'disabled:pointer-events-none disabled:opacity-45',
         item.danger
           ? 'text-red-600 hover:bg-red-50'
@@ -112,7 +114,11 @@ export function DropdownMenu({
           id={id}
           role="menu"
           className={cn(
-            'animate-in-rise absolute z-30 mt-1.5 w-56 overflow-hidden rounded-xl border border-surface/80 bg-surface p-1.5 shadow-[var(--shadow-pop)] ring-1 ring-ink/[0.045]',
+            // Largura com teto no tamanho da viewport: numa tela estreita
+            // (ex.: gatilho perto da borda em 360px) w-56 fixo vazava para
+            // fora e cortava o menu. max-h + overflow evita o mesmo problema
+            // na vertical quando o menu abre perto do rodapé.
+            'animate-in-rise absolute z-30 mt-1.5 max-h-[70vh] w-[min(14rem,calc(100vw-2rem))] overflow-y-auto overflow-x-hidden rounded-xl border border-surface/80 bg-surface p-1.5 shadow-[var(--shadow-pop)] ring-1 ring-ink/[0.045]',
             align === 'right' ? 'right-0' : 'left-0',
           )}
         >

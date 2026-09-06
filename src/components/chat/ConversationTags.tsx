@@ -32,7 +32,7 @@ export function ConversationTags({ conversationId }: { conversationId: string })
             <button
               type="button"
               onClick={() => setAbrindo((v) => !v)}
-              className="inline-flex items-center gap-1 text-2xs font-medium text-link transition-colors hover:text-orange-500"
+              className="inline-flex min-h-8 items-center gap-1 py-1 text-2xs font-medium text-link transition-colors hover:text-orange-500"
             >
               <Plus className="size-3" />
               {abrindo ? 'fechar' : 'marcar'}
@@ -104,7 +104,7 @@ export function ConversationTags({ conversationId }: { conversationId: string })
                 }
               }}
               className={cn(
-                'inline-flex items-center gap-1 rounded-md border border-dashed border-line-strong px-1.5 py-0.5',
+                'inline-flex min-h-7 items-center gap-1 rounded-md border border-dashed border-line-strong px-1.5 py-0.5',
                 'text-2xs font-medium text-ink/60 transition-colors hover:border-muted hover:text-ink',
               )}
             >

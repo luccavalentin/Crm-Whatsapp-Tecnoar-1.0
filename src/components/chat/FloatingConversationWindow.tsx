@@ -44,14 +44,29 @@ function initialFloatingPosition() {
   }
 }
 
+/** Abaixo de md a janela flutuante estilo Messenger não cabe: vira tela cheia. */
+function isMobileViewport() {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth < 768
+}
+
 export function FloatingConversationWindow() {
   const { conversationId, minimized, closeChat, setMinimized } = useFloatingChat()
   const { company } = useAuth()
   const [position, setPosition] = useState(initialFloatingPosition)
+  const [isMobile, setIsMobile] = useState(isMobileViewport)
   const dragRef = useRef<{ dx: number; dy: number } | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [needsTemplate, setNeedsTemplate] = useState(false)
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(isMobileViewport())
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useRealtimeInbox(company?.id)
   const { data: conversation, isLoading } = useConversation(conversationId ?? undefined)
@@ -92,6 +107,13 @@ export function FloatingConversationWindow() {
     }
   }, [minimized])
 
+  useEffect(() => {
+    // Ao entrar no modo tela cheia (mobile) a janela e reancorada; se depois
+    // a tela crescer de volta para desktop, volta a existir uma posicao
+    // valida em vez de ficar grudada no canto onde a tela cheia a deixou.
+    if (!isMobile) setPosition(initialFloatingPosition())
+  }, [isMobile])
+
   if (!conversationId) return null
 
   const customerName = displayName(
@@ -101,6 +123,8 @@ export function FloatingConversationWindow() {
   const isClosed = conversation?.status === 'concluido'
 
   function startDrag(event: PointerEvent<HTMLDivElement>) {
+    // Em mobile a janela e tela cheia: nao ha o que arrastar.
+    if (isMobile) return
     const rect = event.currentTarget.closest('[data-floating-chat]')?.getBoundingClientRect()
     if (!rect) return
     dragRef.current = { dx: event.clientX - rect.left, dy: event.clientY - rect.top }
@@ -132,18 +156,33 @@ export function FloatingConversationWindow() {
     <aside
       data-floating-chat
       className={cn(
-        'fixed z-50 overflow-hidden rounded-2xl border border-surface/80 bg-surface shadow-[var(--shadow-pop)] ring-1 ring-ink/[0.08]',
-        'w-[min(calc(100vw-24px),420px)]',
-        minimized ? 'h-14' : 'h-[min(calc(100vh-24px),650px)]',
+        'fixed z-50 overflow-hidden border-surface/80 bg-surface ring-1 ring-ink/[0.08]',
+        isMobile
+          ? // No celular a "janelinha" flutuante fica pequena e ilegível — vira
+            // tela cheia (ou uma barra inteira quando minimizada), sem borda
+            // arredondada nem sombra de elemento sobreposto. Os dois casos usam
+            // conjuntos de classes de posicionamento distintos (nunca `inset-0`
+            // e `bottom-0` juntos) para não depender da ordem interna do Tailwind.
+            minimized
+              ? 'inset-x-0 bottom-0 top-auto h-14 w-full rounded-none border-0 shadow-none'
+              : 'inset-0 h-full w-full rounded-none border-0 shadow-none'
+          : cn(
+              'rounded-2xl border shadow-[var(--shadow-pop)]',
+              'w-[min(calc(100vw-24px),420px)]',
+              minimized ? 'h-14' : 'h-[min(calc(100vh-24px),650px)]',
+            ),
       )}
-      style={{ left: position.x, top: position.y }}
+      style={isMobile ? undefined : { left: position.x, top: position.y }}
       aria-label="Chat solto"
     >
       <div
         onPointerDown={startDrag}
-        className="flex h-14 cursor-move items-center gap-2 border-b border-white/10 bg-navy-900 px-3 text-white"
+        className={cn(
+          'flex h-14 items-center gap-2 border-b border-white/10 bg-navy-900 px-3 text-white',
+          isMobile ? 'cursor-default' : 'cursor-move',
+        )}
       >
-        <GripHorizontal className="size-4 shrink-0 text-white/40" />
+        <GripHorizontal className={cn('size-4 shrink-0 text-white/40', isMobile && 'hidden')} />
         <Avatar
           name={customerName}
           seed={conversation?.customer?.id ?? conversationId}
@@ -165,7 +204,7 @@ export function FloatingConversationWindow() {
         <button
           type="button"
           onClick={() => setMinimized(!minimized)}
-          className="rounded-lg p-1.5 text-white/65 transition-colors hover:bg-white/10 hover:text-white"
+          className="flex size-9 items-center justify-center rounded-lg p-1.5 text-white/65 transition-colors hover:bg-white/10 hover:text-white sm:size-auto"
           aria-label={minimized ? 'Restaurar chat' : 'Minimizar chat'}
           title={minimized ? 'Restaurar chat' : 'Minimizar chat'}
         >

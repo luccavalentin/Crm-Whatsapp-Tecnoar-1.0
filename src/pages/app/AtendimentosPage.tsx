@@ -17,6 +17,7 @@ import {
   ExternalLink,
   FileText,
   Hand,
+  Info,
   MessageSquarePlus,
   MessagesSquare,
   Phone,
@@ -523,6 +524,9 @@ function ConversationView({
   const { can } = usePermissions()
   const [eraseOpen, setEraseOpen] = useState(false)
   const [replyTo, setReplyTo] = useState<ReplyTarget | null>(null)
+  // Abaixo de xl a coluna do cliente some da tela — sem isto ela ficaria
+  // inacessível para quem atende em tablet ou celular.
+  const [infoOpen, setInfoOpen] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
   const [transferOpen, setTransferOpen] = useState(false)
@@ -665,8 +669,22 @@ function ConversationView({
               onClick={() => openChat(conversationId)}
               title="Soltar chat em uma janela flutuante"
               aria-label="Soltar chat em uma janela flutuante"
+              className="hidden sm:inline-flex"
             >
               <ExternalLink className="size-4" />
+            </Button>
+
+            {/* Abaixo de xl a coluna do cliente/IA some — este botão é o único
+                jeito de chegar nela em tablet e celular. */}
+            <Button
+              size="icon-sm"
+              variant="outline"
+              onClick={() => setInfoOpen(true)}
+              title="Ver dados do cliente e da IA"
+              aria-label="Ver dados do cliente e da IA"
+              className="xl:hidden"
+            >
+              <Info className="size-4" />
             </Button>
 
             <DropdownMenu
@@ -787,7 +805,7 @@ function ConversationView({
         )}
 
         {isClosed ? (
-          <div className="border-t border-line bg-surface/[0.9] px-4 py-4 backdrop-blur">
+          <div className="border-t border-line bg-surface/[0.9] px-4 py-4 pb-safe-3 backdrop-blur">
             <p className="text-center text-sm text-muted">
               Atendimento concluído. Reabra para voltar a enviar mensagens.
             </p>
@@ -805,13 +823,22 @@ function ConversationView({
         )}
       </section>
 
-      {/* Coluna 3 — cliente e IA */}
+      {/* Coluna 3 — cliente e IA (só cabe de sobra a partir de xl; abaixo
+          disso vira o modal aberto pelo botão "Info" no cabeçalho) */}
       <aside className="scrollbar-thin hidden w-[336px] shrink-0 flex-col overflow-y-auto border-l border-line/80 bg-surface xl:flex">
-        <CustomerPanel conversation={conversation} />
-        <ConversationTags conversationId={conversationId} />
-        <AIPanel conversation={conversation} />
-        <EventsPanel events={events ?? []} />
+        <ConversationSidePanels conversation={conversation} conversationId={conversationId} events={events} />
       </aside>
+
+      <Modal
+        open={infoOpen}
+        onClose={() => setInfoOpen(false)}
+        title="Cliente e IA"
+        description="Dados do cadastro, tags e análise deste atendimento."
+      >
+        <div className="-mx-4 -my-4 sm:-mx-5 sm:-my-5">
+          <ConversationSidePanels conversation={conversation} conversationId={conversationId} events={events} />
+        </div>
+      </Modal>
 
       <TemplateModal
         open={templateOpen}
@@ -1246,6 +1273,26 @@ function MessageStatusIcon({ status }: { status: MessageWithSender['status'] }) 
  * separadas por uma linha. A da IA continua com fundo próprio, porque é
  * informação interna e não pode ser confundida com dado do cadastro.
  */
+/** Conteúdo da coluna 3, reaproveitado na coluna fixa (xl) e no modal (abaixo de xl). */
+function ConversationSidePanels({
+  conversation,
+  conversationId,
+  events,
+}: {
+  conversation: ConversationWithRelations
+  conversationId: string
+  events: Array<{ id: string; title: string; description: string | null; created_at: string }> | undefined
+}) {
+  return (
+    <>
+      <CustomerPanel conversation={conversation} />
+      <ConversationTags conversationId={conversationId} />
+      <AIPanel conversation={conversation} />
+      <EventsPanel events={events ?? []} />
+    </>
+  )
+}
+
 function CustomerPanel({ conversation }: { conversation: ConversationWithRelations }) {
   const customer = conversation.customer
   return (

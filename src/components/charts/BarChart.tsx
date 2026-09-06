@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Table2, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -30,6 +30,23 @@ export function BarChart({
 }) {
   const id = useId()
   const [comoTabela, setComoTabela] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  // Largura real do container, e nao um valor fixo em px: e o que permite o
+  // SVG esticar em telas grandes e so entrar em scroll horizontal quando os
+  // dados realmente nao cabem (muitos pontos numa tela estreita).
+  const [containerWidth, setContainerWidth] = useState(320)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new ResizeObserver((entries) => {
+      const largura = entries[0]?.contentRect.width
+      if (largura) setContainerWidth(Math.floor(largura))
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   const max = Math.max(1, ...data.flatMap((point) => series.map((s) => point.values[s.key] ?? 0)))
   const ticks = niceTicks(max)
   const top = ticks[ticks.length - 1]
@@ -37,13 +54,14 @@ export function BarChart({
   const paddingLeft = 38
   const paddingBottom = 26
   const paddingTop = 10
-  const width = Math.max(320, data.length * (series.length * 14 + 22) + paddingLeft)
+  const larguraMinima = data.length * (series.length * 14 + 22) + paddingLeft
+  const width = Math.max(containerWidth, larguraMinima, 240)
   const plotHeight = height - paddingBottom - paddingTop
   const slot = (width - paddingLeft - 8) / Math.max(1, data.length)
   const barWidth = Math.min(18, (slot - 10) / series.length)
 
   return (
-    <div className={cn('w-full min-w-0 max-w-full', className)}>
+    <div ref={containerRef} className={cn('w-full min-w-0 max-w-full', className)}>
       {comoTabela ? (
         <Tabela data={data} series={series} />
       ) : (

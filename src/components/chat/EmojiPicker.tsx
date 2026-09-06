@@ -382,7 +382,7 @@ export function EmojiPicker({ onPick, disabled }: { onPick: (emoji: string) => v
         title="Emojis"
         aria-label="Emojis"
         className={cn(
-          'flex size-9 items-center justify-center rounded-xl text-muted transition-colors',
+          'flex size-10 shrink-0 items-center justify-center rounded-xl text-muted transition-colors sm:size-9',
           'hover:bg-ink/[0.05] hover:text-ink disabled:opacity-40',
           open && 'bg-ink/[0.06] text-ink',
         )}
@@ -391,7 +391,13 @@ export function EmojiPicker({ onPick, disabled }: { onPick: (emoji: string) => v
       </button>
 
       {open && (
-        <div className="animate-in-rise absolute bottom-11 left-0 z-30 flex w-[352px] flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-pop)]">
+        <div
+          // Largura em min(88vw, 352px): ancorado no botao (canto inferior
+          // esquerdo do composer), uma largura fixa estourava a tela em
+          // aparelhos de 360-390px. O clamp por vw acompanha o espaco real
+          // disponivel a direita do botao sem precisar medir em JS.
+          className="animate-in-rise absolute bottom-11 left-0 z-30 flex w-[min(88vw,352px)] flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-pop)]"
+        >
           <div className="flex items-center gap-2 border-b border-line px-3 py-2">
             <Search className="size-3.5 shrink-0 text-muted" />
             <input
@@ -439,7 +445,7 @@ export function EmojiPicker({ onPick, disabled }: { onPick: (emoji: string) => v
                     aria-pressed={ativo}
                     onClick={() => setGroup(item.key)}
                     className={cn(
-                      'relative flex h-9 flex-1 items-center justify-center rounded-lg transition-colors',
+                      'relative flex h-10 flex-1 items-center justify-center rounded-lg transition-colors sm:h-9',
                       ativo ? 'text-ink' : 'text-muted hover:bg-ink/[0.04] hover:text-ink',
                     )}
                   >

@@ -101,7 +101,7 @@ export function DashboardPage() {
           gestor a ler tudo para descobrir se está pegando fogo. */}
       <section>
         <SectionTitle className="mb-2">Precisa de ação agora</SectionTitle>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat
             icon={Zap}
             label="Emergências"
@@ -138,7 +138,7 @@ export function DashboardPage() {
 
       <section>
         <SectionTitle className="mb-2">Em andamento</SectionTitle>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat
             icon={MessagesSquare}
             label="Atendimentos ativos"

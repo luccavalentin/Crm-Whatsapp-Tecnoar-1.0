@@ -26,7 +26,10 @@ export function PeriodFilter({
 
   return (
     <>
-      <div className="flex shrink-0 gap-1 rounded-xl border border-surface/80 bg-surface/75 p-1 shadow-[var(--shadow-card)] ring-1 ring-ink/[0.035]">
+      {/* flex-wrap evita que a barra de presets estoure a largura da tela em
+          telas muito estreitas — vira duas linhas em vez de forcar scroll
+          horizontal na Topbar. */}
+      <div className="flex flex-wrap shrink-0 gap-1 rounded-xl border border-surface/80 bg-surface/75 p-1 shadow-[var(--shadow-card)] ring-1 ring-ink/[0.035]">
         {OPTIONS.map((option) => (
           <button
             key={option.key}

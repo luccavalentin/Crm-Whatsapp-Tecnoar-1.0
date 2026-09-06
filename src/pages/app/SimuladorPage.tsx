@@ -163,7 +163,10 @@ export function SimuladorPage() {
       </Alert>
 
       <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
-        <Card className="flex min-h-[420px] flex-col">
+        {/* Altura travada (min + max) para a lista de mensagens rolar por
+            dentro e o campo de envio ficar sempre visível, sem precisar
+            rolar a página inteira no celular. */}
+        <Card className="flex h-[min(70dvh,640px)] min-h-[420px] flex-col">
           <CardHeader title="Conversa de teste" description="Escreva como se fosse o cliente." />
 
           <div className="scrollbar-thin min-h-0 flex-1 space-y-3 overflow-y-auto p-5">
@@ -226,14 +229,16 @@ export function SimuladorPage() {
             </div>
           )}
 
-          <form onSubmit={submit} className="border-t border-line p-4">
+          <form onSubmit={submit} className="shrink-0 border-t border-line p-4 pb-safe-3">
             <div className="flex items-end gap-2">
               <TextArea
                 name="simulacao"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Mensagem do cliente…"
-                className="min-h-[46px] flex-1 resize-none py-3"
+                // min-w-0: sem isto o textarea recusa encolher dentro do flex
+                // e empurra o botão para fora da tela em telas estreitas.
+                className="min-h-[46px] min-w-0 flex-1 resize-none py-3"
                 rows={1}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {

@@ -182,7 +182,9 @@ export function QrConnectModal({
             <img
               src={qrcode.startsWith('data:') ? qrcode : `data:image/png;base64,${qrcode}`}
               alt="QR Code para conectar o WhatsApp"
-              className="size-64 rounded-xl border border-line bg-surface p-2"
+              // size-64 cabe em qualquer largura de celular (inclusive 360px);
+              // no desktop cresce um pouco para não sobrar tanto vazio no modal.
+              className="size-64 rounded-xl border border-line bg-surface p-2 sm:size-72"
             />
             {loading && (
               <span className="absolute inset-0 flex items-center justify-center rounded-xl bg-surface/70">

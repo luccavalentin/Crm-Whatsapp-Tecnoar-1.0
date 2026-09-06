@@ -148,12 +148,14 @@ export function RelatorioTab({ period }: { period: Period }) {
         </p>
       </div>
 
-      <div className="flex justify-end gap-2" data-sem-impressao>
-        <Button size="sm" variant="outline" onClick={() => window.print()}>
+      {/* Empilha no celular: os dois botoes com texto completo lado a lado
+          nao cabem em 360px, e encolher a fonte deixaria o rotulo ilegivel. */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end" data-sem-impressao>
+        <Button size="sm" variant="outline" className="w-full sm:w-auto" onClick={() => window.print()}>
           <Printer className="size-4" />
           Imprimir ou salvar PDF
         </Button>
-        <Button size="sm" variant="outline" onClick={exportar}>
+        <Button size="sm" variant="outline" className="w-full sm:w-auto" onClick={exportar}>
           <Download className="size-4" />
           Baixar CSV
         </Button>

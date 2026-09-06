@@ -289,9 +289,17 @@ function PortfolioMetric({
         : 'bg-emerald-500/[0.18] text-emerald-100'
 
   return (
-    <div className={cn('min-w-[108px] px-4 py-2.5', toneClass)}>
-      <p className="nums text-xl font-semibold leading-none text-white">{value}</p>
-      <p className="mt-1 text-2xs font-bold uppercase tracking-label text-current">{label}</p>
+    // Sem min-width no celular: 3 colunas com 108px cada passam da largura
+    // disponível em telas de 360px e o container "overflow-hidden" corta a
+    // última métrica. min-w-0 deixa a coluna encolher; volta a 108px a partir
+    // do sm, quando já sobra espaço.
+    <div className={cn('min-w-0 px-2.5 py-2.5 sm:min-w-[108px] sm:px-4', toneClass)}>
+      <p className="nums truncate text-lg font-semibold leading-none text-white sm:text-xl">
+        {value}
+      </p>
+      <p className="mt-1 truncate text-2xs font-bold uppercase tracking-label text-current">
+        {label}
+      </p>
     </div>
   )
 }

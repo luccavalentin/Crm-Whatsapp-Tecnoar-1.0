@@ -107,7 +107,7 @@ export function MetricasPage() {
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Metric
                 icon={MessageCircle}
                 label="Atendimentos"
@@ -193,7 +193,7 @@ export function MetricasPage() {
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Metric
                 icon={Bot}
                 label="Atendimentos com IA"

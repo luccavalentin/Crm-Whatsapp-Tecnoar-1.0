@@ -72,7 +72,7 @@ export function MessageActions({
         aria-haspopup="menu"
         aria-expanded={aberto === 'menu'}
         className={cn(
-          'flex size-[22px] items-center justify-center rounded-md text-ink/45 transition-opacity',
+          'flex size-7 items-center justify-center rounded-md text-ink/45 transition-opacity sm:size-[22px]',
           'hover:bg-ink/[0.07] hover:text-ink/80',
           // No toque não existe hover: no celular a seta fica sempre visível.
           'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100',
@@ -86,7 +86,9 @@ export function MessageActions({
         <div
           role="menu"
           className={cn(
-            'animate-in-rise absolute top-7 z-30 w-44 overflow-hidden rounded-xl border border-line bg-surface py-1 shadow-[var(--shadow-pop)]',
+            // max-w evita que o menu ultrapasse a borda da tela quando a bolha
+            // esta colada na margem, em telas bem estreitas.
+            'animate-in-rise absolute top-7 z-30 w-44 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-line bg-surface py-1 shadow-[var(--shadow-pop)]',
             side === 'right' ? 'right-0' : 'left-0',
           )}
         >
@@ -122,7 +124,7 @@ export function MessageActions({
       {aberto === 'reacoes' && (
         <div
           className={cn(
-            'animate-in-rise absolute top-7 z-30 flex items-center gap-0.5 rounded-full border border-line bg-surface px-1.5 py-1 shadow-[var(--shadow-pop)]',
+            'animate-in-rise absolute top-7 z-30 flex max-w-[calc(100vw-1.5rem)] items-center gap-0.5 overflow-x-auto rounded-full border border-line bg-surface px-1.5 py-1 shadow-[var(--shadow-pop)]',
             side === 'right' ? 'right-0' : 'left-0',
           )}
         >
@@ -137,7 +139,7 @@ export function MessageActions({
               }}
               title={`Reagir com ${emoji}`}
               className={cn(
-                'flex size-8 items-center justify-center rounded-full text-lg transition-transform',
+                'flex size-9 shrink-0 items-center justify-center rounded-full text-lg transition-transform sm:size-8',
                 'hover:scale-125 disabled:opacity-40',
                 mine === emoji && 'bg-cyan-100',
               )}
@@ -156,7 +158,7 @@ export function MessageActions({
               }}
               title="Mais emojis"
               aria-label="Mais emojis"
-              className="ml-0.5 flex size-8 items-center justify-center rounded-full border border-line text-muted transition-colors hover:bg-ink/[0.05] hover:text-ink"
+              className="ml-0.5 flex size-9 shrink-0 items-center justify-center rounded-full border border-line text-muted transition-colors hover:bg-ink/[0.05] hover:text-ink sm:size-8"
             >
               <Plus className="size-4" />
             </button>
@@ -181,7 +183,7 @@ function ItemDoMenu({
       type="button"
       role="menuitem"
       onClick={onClick}
-      className="flex w-full items-center gap-2.5 px-3 py-1.5 text-sm text-ink/85 transition-colors hover:bg-ink/[0.05]"
+      className="flex min-h-10 w-full items-center gap-2.5 px-3 py-2 text-sm text-ink/85 transition-colors hover:bg-ink/[0.05] sm:min-h-0 sm:py-1.5"
     >
       <Icone className="size-4 text-muted" />
       {rotulo}
@@ -220,7 +222,7 @@ export function ReactionChips({
           onClick={() => onToggle(mine ? null : emoji)}
           title={mine ? 'Remover sua reação' : `Reagir com ${emoji}`}
           className={cn(
-            'flex items-center gap-1 rounded-full border px-1.5 py-[3px] text-xs leading-none shadow-[var(--shadow-card)] transition-colors',
+            'flex min-h-7 items-center gap-1 rounded-full border px-1.5 py-[3px] text-xs leading-none shadow-[var(--shadow-card)] transition-colors',
             mine
               ? 'border-cyan-500/40 bg-cyan-100 text-cyan-600'
               : 'border-line bg-surface text-ink/70 hover:bg-ink/[0.04]',

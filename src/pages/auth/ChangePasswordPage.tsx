@@ -55,7 +55,7 @@ export function ChangePasswordPage() {
         Voltar
       </button>
 
-      <Card className="p-6">
+      <Card className="p-5 sm:p-6">
         <h1 className="text-lg font-semibold tracking-tight text-ink">Alterar senha</h1>
         <p className="mt-1 text-sm text-muted">
           Por segurança, confirme a senha atual antes de definir a nova.
