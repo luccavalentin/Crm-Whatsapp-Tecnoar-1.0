@@ -1,0 +1,31 @@
+services:
+  tecnoar-crm:
+    build:
+      context: .
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    image: tecnoar-crm:latest
+    container_name: tecnoar-crm
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      # Publicado pelo Traefik que já existe na VPS (HTTPS + Let's Encrypt)
+      traefik.enable: "true"
+      traefik.docker.network: "tecnoar-crm_web"
+      traefik.http.routers.tecnoar-crm.rule: "Host(`${SITE_DOMAIN}`)"
+      traefik.http.routers.tecnoar-crm.entrypoints: "websecure"
+      traefik.http.routers.tecnoar-crm.tls: "true"
+      traefik.http.routers.tecnoar-crm.tls.certresolver: "letsencrypt"
+      traefik.http.services.tecnoar-crm.loadbalancer.server.port: "80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  web:
+    driver: bridge
