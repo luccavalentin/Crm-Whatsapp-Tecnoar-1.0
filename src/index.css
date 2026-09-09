@@ -92,6 +92,20 @@
   --radius-xl: 0.5rem;
   --radius-2xl: 0.625rem;
 
+  /* ------------------------------------------------------- Empilhamento
+     Quem fica na frente de quem. Existe escrito porque a causa do bug mais
+     chato desta tela nao e obvia: `backdrop-filter` CRIA CONTEXTO DE
+     EMPILHAMENTO. Uma barra com desfoque prende o z-index dos menus que abrem
+     dentro dela — o menu podia ter z-30 e mesmo assim sumir atras da lista de
+     mensagens, porque quem competia era a barra inteira, sem z-index nenhum.
+
+     Toda faixa com desfoque precisa de posicao e z proprios. A regra:
+       10  conteudo que rola (separador de dia grudado no topo)
+       20  faixas fixas: topo da pagina, cabecalho da conversa, composer
+       30  o que abre a partir delas: menu, seletor de emoji, reacoes
+       40  cortina do menu lateral no celular
+       50  o que cobre a tela: modal, visualizador de midia, janela flutuante */
+
   /* ------------------------------------------------------------- Tipografia
      Escala fechada. Antes existiam 18 tamanhos avulsos espalhados em 274
      lugares — 12px e 12.5px lado a lado, 13px e 13.5px na mesma tela. Ninguem
@@ -575,6 +589,22 @@
   /* Endereco de link nao interessa em relatorio impresso. */
   a[href]::after {
     content: '';
+  }
+
+  /* Por padrao o navegador tira os fundos na impressao para poupar tinta —
+     e leva junto a faixa da marca e as barras do relatorio, que viram tudo
+     branco. Aqui a cor e informacao, entao ela sai. */
+  [data-bloco-impressao] *,
+  .somente-impressao * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* A logo e imagem: nao pode ser escondida junto com o resto da navegacao. */
+  .somente-impressao img {
+    display: block !important;
+    max-height: 46px;
+    width: auto;
   }
 }
 

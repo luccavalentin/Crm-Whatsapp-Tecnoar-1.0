@@ -10,6 +10,7 @@ import {
   type LinhaRelatorio,
   type Period,
 } from '@/features/metrics/api'
+import { Logo } from '@/components/Logo'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatDate } from '@/lib/datetime'
 import { cn } from '@/lib/utils'
@@ -137,15 +138,28 @@ export function RelatorioTab({ period }: { period: Period }) {
       {/* Só sai no papel: quem lê o relatório impresso precisa saber de qual
           empresa é, de que período e quando foi tirado. Na tela isso já está
           no topo, e repetir seria ruído. */}
-      <div className="somente-impressao mb-4 border-b border-line pb-3">
-        <h1 className="text-xl font-semibold text-ink">
-          {company?.name ?? 'Relatório de atendimento'}
-        </h1>
-        <p className="text-sm text-muted">
-          Relatório de atendimento · {formatDate(period.from)} a {formatDate(period.to)}
-          {' · emitido em '}
-          {formatDate(new Date())}
-        </p>
+      <div className="somente-impressao mb-5 border-b-2 border-navy-900 pb-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold text-ink">
+              {company?.name ?? 'Relatório de atendimento'}
+            </h1>
+            <p className="text-sm text-muted">
+              Relatório de atendimento · {formatDate(period.from)} a {formatDate(period.to)}
+            </p>
+            <p className="text-xs text-muted">Emitido em {formatDate(new Date())}</p>
+          </div>
+          {/* A logo entra só no papel. Na tela ela já está na barra lateral, e
+              repetir seria ruído; impresso, é o que identifica de quem é o
+              documento quando ele circula solto numa reunião. */}
+          <Logo className="w-[132px] shrink-0" />
+        </div>
+        {/* Faixa da marca: navy, ciano e laranja, na ordem da identidade. */}
+        <div className="mt-3 flex h-1 overflow-hidden rounded-full">
+          <span className="flex-1 bg-navy-900" />
+          <span className="flex-1 bg-cyan-500" />
+          <span className="flex-1 bg-orange-500" />
+        </div>
       </div>
 
       {/* Empilha no celular: os dois botoes com texto completo lado a lado

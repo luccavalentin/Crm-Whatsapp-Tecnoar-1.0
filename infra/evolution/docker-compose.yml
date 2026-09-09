@@ -44,12 +44,12 @@ services:
       - evolution_instances:/evolution/instances
     networks:
       - evolution
+      - borda
     labels:
       traefik.enable: "true"
-      traefik.docker.network: "evolution_evolution"
+      traefik.docker.network: "borda"
       traefik.http.routers.evolution.rule: "Host(`${EVOLUTION_DOMAIN}`)"
       traefik.http.routers.evolution.entrypoints: "websecure"
-      traefik.http.routers.evolution.tls: "true"
       traefik.http.routers.evolution.tls.certresolver: "letsencrypt"
       traefik.http.services.evolution.loadbalancer.server.port: "8080"
 
@@ -87,5 +87,9 @@ volumes:
   evolution_redis:
 
 networks:
+  # Rede fechada: banco e cache da Evolution não são alcançáveis de fora.
   evolution:
     driver: bridge
+  # Rede compartilhada da VPS, por onde o Traefik publica a API.
+  borda:
+    external: true

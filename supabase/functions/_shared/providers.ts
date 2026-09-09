@@ -375,3 +375,47 @@ export async function sinalizarDigitando(
     console.warn('[whatsapp] nao foi possivel sinalizar digitacao', erro)
   }
 }
+
+/**
+ * Foto de perfil do cliente no WhatsApp.
+ *
+ * Devolve `undefined` quando nao deu para perguntar (provedor sem suporte,
+ * rede fora, credencial faltando) e `null` quando perguntamos e a pessoa nao
+ * tem foto ou mantem o perfil restrito. A diferenca importa: `undefined` deve
+ * ser tentado de novo mais tarde, `null` nao.
+ *
+ * A Meta nao expoe foto de perfil de quem escreve para a empresa, entao la
+ * isso nunca existe — nao e falha, e limite da plataforma.
+ */
+export async function buscarFotoPerfil(
+  // Pede so o que usa: quem chama no webhook tem a linha do banco, que nao
+  // carrega phone_number.
+  channel: Pick<Channel, 'provider' | 'settings' | 'secrets'>,
+  to: string,
+): Promise<string | null | undefined> {
+  if (channel.provider !== 'evolution') return undefined
+
+  const baseUrl = (channel.settings?.base_url as string)?.replace(/\/+$/, '')
+  const instance = channel.settings?.instance as string
+  const apiKey = channel.secrets?.api_key
+  if (!baseUrl || !instance || !apiKey) return undefined
+
+  try {
+    const resposta = await fetch(`${baseUrl}/chat/fetchProfilePictureUrl/${instance}`, {
+      method: 'POST',
+      headers: { apikey: apiKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ number: to }),
+    })
+
+    // 404 é a resposta da Evolution para "esse número não tem foto visível".
+    if (resposta.status === 404) return null
+    if (!resposta.ok) return undefined
+
+    const dados = (await resposta.json()) as { profilePictureUrl?: string | null }
+    const url = dados?.profilePictureUrl
+    return typeof url === 'string' && url.startsWith('http') ? url : null
+  } catch (erro) {
+    console.warn('[whatsapp] nao foi possivel buscar a foto de perfil', erro)
+    return undefined
+  }
+}

@@ -165,6 +165,8 @@ export interface PromptContext {
   settings: AiSettings
   customer: {
     name: string | null
+    /** Nome que a própria pessoa cadastrou no WhatsApp (pushName). */
+    whatsapp_name?: string | null
     phone: string
     company_name: string | null
     isRecurring: boolean
@@ -456,9 +458,20 @@ Nunca afirme ser uma pessoa específica nem negue ser automático quando
 perguntado. Cliente que descobre depois que foi enganado não volta — e a Meta
 derruba número de WhatsApp que faz isso.
 
+COMO TRATAR A PESSOA
+- Cliente sem nome no cadastro: pergunte COMO ELA PREFERE SER CHAMADA, não o
+  nome completo. É mais cordial e é o que dá certo no WhatsApp: muita gente
+  atende por apelido. "Como posso te chamar?" resolve melhor que "qual seu
+  nome completo?".
+- A pessoa respondeu? Use esse nome daí em diante e devolva em
+  "customer_fields" com a chave "nome".
+- Ela não quis dizer, desconversou ou foi direto ao problema? NÃO insista e
+  NÃO pergunte de novo. Use o nome do WhatsApp que está abaixo, se houver, e
+  siga o atendimento. Nome é cortesia, não requisito — quem está com o
+  caminhão parado quer resolver, não preencher cadastro.
+- Nunca invente nem abrevie o nome de ninguém.
+
 COLETA DE DADOS (natural, nunca interrogatório)
-- Cliente novo sem nome no cadastro: pergunte o nome logo no começo, solto —
-  "Claro, eu te ajudo. Qual seu nome?"
 - Orçamento, socorro, agendamento, garantia ou OS: colete nome, placa, modelo,
   cidade, o problema e a urgência. Uma ou duas coisas por vez, nunca tudo de
   uma vez.
@@ -472,7 +485,12 @@ ${plantao}
 - intent "emergencia_freio", priority "emergencia", escalate true.
 
 CLIENTE
-- Nome: ${customer.name ?? 'ainda não informado — pergunte'}
+- Nome: ${
+    customer.name ??
+    (customer.whatsapp_name
+      ? `não confirmado — no WhatsApp aparece como "${customer.whatsapp_name}". Pergunte como ela prefere ser chamada; se não disser, use esse.`
+      : 'ainda não informado — pergunte como ela prefere ser chamada')
+  }
 - Telefone: ${customer.phone}
 - Empresa: ${customer.company_name ?? 'não informada'}
 - Atendimentos anteriores: ${customer.serviceCount}${customer.isRecurring ? ' (já é cliente)' : ' (primeiro contato)'}

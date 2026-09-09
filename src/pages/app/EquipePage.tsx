@@ -213,26 +213,87 @@ export function EquipePage() {
       )}
 
       {tab === 'permissoes' && (
-        <Card>
-          <CardHeader
-            title="Como as permissões funcionam"
-            description="Cada usuário parte do padrão do seu papel e pode ser ajustado individualmente."
-          />
-          <div className="space-y-4 p-5">
-            <Alert tone="info">
-              O bloqueio é aplicado no banco de dados, não apenas na tela: uma ação sem permissão é
-              recusada mesmo que a requisição seja feita por fora do sistema.
-            </Alert>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {(['owner', 'admin', 'manager', 'agent'] as UserRole[]).map((role) => (
-                <div key={role} className="rounded-xl border border-line p-4">
-                  <p className="text-sm font-medium text-ink">{ROLE_LABEL[role]}</p>
-                  <p className="mt-0.5 text-xs text-muted">{ROLE_HINT[role]}</p>
-                </div>
-              ))}
+        <div className="space-y-4">
+          {/* Esta aba era só texto explicando os papéis — quem clicava em
+              "Permissões" para MUDAR alguma coisa não achava onde, porque a
+              ação vivia escondida na aba de usuários. Agora a lista vem aqui,
+              com quem tem ajuste próprio marcado. */}
+          <Card>
+            <CardHeader
+              title="Permissões por pessoa"
+              description="Cada um começa com o padrão do papel. Ajuste individual sobrepõe o padrão."
+            />
+            {(members ?? []).length === 0 ? (
+              <EmptyState
+                icon={ShieldCheck}
+                title="Nenhum usuário cadastrado"
+                description="Cadastre alguém em Usuários para poder ajustar as permissões."
+              />
+            ) : (
+              <ul className="divide-y divide-line">
+                {(members ?? []).map((member) => {
+                  const ajustes = Object.keys(
+                    (member.permissions ?? {}) as Record<string, boolean>,
+                  ).length
+                  return (
+                    <li
+                      key={member.id}
+                      className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-ink">
+                          {member.full_name || member.email}
+                        </p>
+                        <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
+                          <span>{ROLE_LABEL[member.role]}</span>
+                          <span aria-hidden="true">·</span>
+                          <span>
+                            {ajustes > 0
+                              ? `${ajustes} ajuste${ajustes > 1 ? 's' : ''} próprio${ajustes > 1 ? 's' : ''}`
+                              : 'Segue o padrão do papel'}
+                          </span>
+                        </p>
+                      </div>
+                      {canManage ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setPermissionTarget(member)}
+                        >
+                          <ShieldCheck className="size-4" />
+                          Editar permissões
+                        </Button>
+                      ) : (
+                        <Badge tone="neutral">Somente leitura</Badge>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </Card>
+
+          <Card>
+            <CardHeader
+              title="O que cada papel já traz"
+              description="É o ponto de partida de quem entra. Dá para apertar ou afrouxar pessoa a pessoa."
+            />
+            <div className="space-y-4 p-5">
+              <Alert tone="info">
+                O bloqueio é aplicado no banco de dados, não apenas na tela: uma ação sem permissão é
+                recusada mesmo que a requisição seja feita por fora do sistema.
+              </Alert>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {(['owner', 'admin', 'manager', 'agent'] as UserRole[]).map((role) => (
+                  <div key={role} className="rounded-xl border border-line p-4">
+                    <p className="text-sm font-medium text-ink">{ROLE_LABEL[role]}</p>
+                    <p className="mt-0.5 text-xs text-muted">{ROLE_HINT[role]}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       )}
 
       <CreateUserModal

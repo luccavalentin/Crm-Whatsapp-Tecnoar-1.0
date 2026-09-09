@@ -49,6 +49,10 @@ export type CustomerRow = {
   phone: string
   phone_raw: string | null
   whatsapp_name: string | null
+  /** Foto de perfil do WhatsApp. Nulo = sem foto ou perfil restrito. */
+  photo_url: string | null
+  /** Quando a foto foi conferida. Nulo = nunca conferida. */
+  photo_checked_at: string | null
   email: string | null
   document: string | null
   company_name: string | null

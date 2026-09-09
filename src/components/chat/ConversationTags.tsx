@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Bot, Check, Plus, Tag } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Bot, Check, Plus, Settings2, Tag } from 'lucide-react'
 import { Badge, SectionTitle } from '@/components/ui'
 import { toneDaEtiqueta, useConversationTags, useTags, useToggleConversationTag } from '@/features/tags/api'
 import { useAuth } from '@/contexts/AuthContext'
@@ -120,6 +121,27 @@ export function ConversationTags({ conversationId }: { conversationId: string })
           <Check className="size-3.5" />
           Todas as etiquetas já estão neste atendimento.
         </p>
+      )}
+
+      {/* Daqui só dá para MARCAR etiqueta que já existe — criar é em
+          Configurações, e sem este atalho ninguém achava o caminho. Quando a
+          empresa ainda não tem nenhuma, o vazio explica o que fazer em vez de
+          só não mostrar nada. */}
+      {abrindo && (disponiveis?.length ?? 0) === 0 && (
+        <p className="mt-2 text-xs leading-snug text-muted">
+          Nenhuma etiqueta cadastrada ainda. Etiquetas servem para separar os
+          atendimentos do seu jeito — "orçamento", "frota", "garantia".
+        </p>
+      )}
+
+      {abrindo && (
+        <Link
+          to="/configuracoes?aba=etiquetas"
+          className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-link hover:text-orange-500"
+        >
+          <Settings2 className="size-3.5" />
+          {(disponiveis?.length ?? 0) === 0 ? 'Criar a primeira etiqueta' : 'Criar ou editar etiquetas'}
+        </Link>
       )}
     </section>
   )

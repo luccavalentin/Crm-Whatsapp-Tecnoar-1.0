@@ -1,31 +1,43 @@
+# CRM WhatsApp Tecnoar — container da aplicação.
+#
+# Todos os nomes daqui (serviço, container, imagem e roteador do Traefik) usam
+# "crm-whats-tecnoar" DE PROPÓSITO. A mesma VPS já hospeda outros sistemas —
+# tecnoar-crm, checklist-tecnoar e a Evolution — e nome repetido em qualquer
+# um desses lugares faz o Docker adotar o container alheio ou o Traefik
+# sobrescrever a rota de outro sistema. São aplicações diferentes e precisam
+# de identidades diferentes.
+#
+# A rede "borda" é externa e compartilhada: este arquivo apenas ENTRA nela,
+# nunca a cria nem a altera.
+
 services:
-  tecnoar-crm:
+  crm-whats-tecnoar:
     build:
       context: .
       args:
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
         VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
-    image: tecnoar-crm:latest
-    container_name: tecnoar-crm
+    image: crm-whats-tecnoar:latest
+    container_name: crm-whats-tecnoar
     restart: unless-stopped
-    networks:
-      - web
+    networks: [borda]
     labels:
-      # Publicado pelo Traefik que já existe na VPS (HTTPS + Let's Encrypt)
       traefik.enable: "true"
-      traefik.docker.network: "tecnoar-crm_web"
-      traefik.http.routers.tecnoar-crm.rule: "Host(`${SITE_DOMAIN}`)"
-      traefik.http.routers.tecnoar-crm.entrypoints: "websecure"
-      traefik.http.routers.tecnoar-crm.tls: "true"
-      traefik.http.routers.tecnoar-crm.tls.certresolver: "letsencrypt"
-      traefik.http.services.tecnoar-crm.loadbalancer.server.port: "80"
+      traefik.docker.network: "borda"
+      traefik.http.routers.crm-whats-tecnoar.rule: "Host(`${SITE_DOMAIN}`)"
+      traefik.http.routers.crm-whats-tecnoar.entrypoints: "websecure"
+      traefik.http.routers.crm-whats-tecnoar.tls.certresolver: "letsencrypt"
+      traefik.http.services.crm-whats-tecnoar.loadbalancer.server.port: "80"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
 
 networks:
-  web:
-    driver: bridge
+  borda:
+    external: true

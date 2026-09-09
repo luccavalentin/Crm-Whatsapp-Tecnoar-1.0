@@ -12,6 +12,7 @@ import {
   UserCheck,
   Users,
   UserSquare2,
+  Trash2,
 } from 'lucide-react'
 import {
   Alert,
@@ -24,11 +25,12 @@ import {
   Select,
   Tabs,
 } from '@/components/ui'
-import { Modal } from '@/components/ui/Modal'
+import { ConfirmDialog, Modal } from '@/components/ui/Modal'
 import { usePageChrome } from '@/components/layout/AppLayout'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCompanyMembers } from '@/features/team/api'
 import { useCreateCustomer, useCustomers, type CustomerListFilters } from '@/features/customers/api'
+import { useEraseCustomer } from '@/features/conversations/api'
 import { formatPhone, isValidPhone, maskPhoneInput } from '@/lib/phone'
 import { Avatar } from '@/components/ui/Avatar'
 import { cn, displayName } from '@/lib/utils'
@@ -41,6 +43,11 @@ export function ClientesPage() {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<CustomerStatus | 'all'>('active')
   const [newOpen, setNewOpen] = useState(false)
+  const [paraExcluir, setParaExcluir] = useState<{ id: string; nome: string } | null>(null)
+  const excluir = useEraseCustomer()
+  // Excluir apaga o histórico junto: fica com quem administra, não com quem
+  // atende. Arquivar continua disponível para todos, dentro do cadastro.
+  const podeExcluir = profile?.role === 'owner' || profile?.role === 'admin'
 
   const filters = useMemo<CustomerListFilters>(() => ({ search, status }), [search, status])
   const { data: customers, isLoading, error } = useCustomers(company?.id, filters)
@@ -181,14 +188,23 @@ export function ClientesPage() {
               {clientes.map((customer) => {
                 const nome = customerName(customer.name || customer.whatsapp_name)
                 return (
-                  <li key={customer.id}>
+                  <li key={customer.id} className="group relative">
+                    {/* A linha era um <button> só, e por isso não cabia mais
+                        nenhuma ação dentro dela — excluir só existia depois de
+                        abrir o cadastro. O botão agora cobre a área de navegar,
+                        e o excluir fica por cima, fora dele. */}
                     <button
                       type="button"
                       onClick={() => navigate(`/clientes/${customer.id}`)}
-                      className="group grid w-full grid-cols-1 gap-2 px-4 py-4 text-left transition-all hover:bg-gradient-to-r hover:from-cyan-500/[0.055] hover:to-transparent sm:px-5 lg:grid-cols-[2fr_1.15fr_1fr_1fr_0.8fr_1.15fr_2.25rem] lg:items-center lg:gap-4"
+                      className="grid w-full grid-cols-1 gap-2 px-4 py-4 pr-14 text-left transition-all hover:bg-gradient-to-r hover:from-cyan-500/[0.055] hover:to-transparent sm:px-5 sm:pr-14 lg:grid-cols-[2fr_1.15fr_1fr_1fr_0.8fr_1.15fr_2.25rem] lg:items-center lg:gap-4"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-                        <Avatar name={nome} seed={customer.id} className="ring-cyan-500/10" />
+                        <Avatar
+                          name={nome}
+                          seed={customer.id}
+                          photoUrl={customer.photo_url}
+                          className="ring-cyan-500/10"
+                        />
                         <div className="min-w-0">
                           <p className="flex items-center gap-2 truncate text-sm font-semibold text-ink">
                             {nome}
@@ -245,6 +261,23 @@ export function ClientesPage() {
                         <ArrowRight className="size-4" />
                       </span>
                     </button>
+
+                    {podeExcluir && (
+                      <button
+                        type="button"
+                        onClick={() => setParaExcluir({ id: customer.id, nome })}
+                        aria-label={`Excluir ${nome}`}
+                        title="Excluir cliente"
+                        className={cn(
+                          'absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg',
+                          'text-muted transition-colors hover:bg-red-50 hover:text-red-600',
+                          // No toque não existe hover: no celular fica sempre visível.
+                          'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100',
+                        )}
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    )}
                   </li>
                 )
               })}
@@ -261,6 +294,29 @@ export function ClientesPage() {
           </>
         )}
       </Card>
+
+      <ConfirmDialog
+        open={Boolean(paraExcluir)}
+        onClose={() => setParaExcluir(null)}
+        loading={excluir.isPending}
+        title="Excluir cliente"
+        confirmLabel="Excluir definitivamente"
+        message={
+          <>
+            Isto remove <strong>permanentemente</strong> o cadastro de {paraExcluir?.nome}, com
+            observações, dados coletados e histórico de atendimento. Não dá para desfazer.
+            <br />
+            <br />
+            Para só tirar da lista sem destruir o histórico, abra o cadastro e use{' '}
+            <strong>Arquivar</strong>.
+          </>
+        }
+        onConfirm={async () => {
+          if (!paraExcluir) return
+          await excluir.mutateAsync({ customerId: paraExcluir.id })
+          setParaExcluir(null)
+        }}
+      />
 
       <NewCustomerModal
         open={newOpen}

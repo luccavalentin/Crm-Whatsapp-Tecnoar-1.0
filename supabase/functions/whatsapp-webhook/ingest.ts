@@ -1,5 +1,44 @@
 import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import { storeInboundMedia, type InboundMediaRef } from './media.ts'
+import { buscarFotoPerfil } from '../_shared/providers.ts'
+
+/** Quanto tempo uma foto ja conferida vale antes de perguntarmos de novo. */
+const VALIDADE_DA_FOTO_MS = 7 * 24 * 60 * 60 * 1000
+
+/**
+ * Mantem a foto do cliente atualizada, sem pesar no caminho da mensagem.
+ *
+ * A Evolution limita as chamadas de perfil e a foto muda raramente, entao so
+ * perguntamos quando nunca perguntamos ou quando a ultima conferencia passou
+ * de uma semana. `photo_checked_at` e gravado mesmo quando nao ha foto — e o
+ * que impede o sistema de perguntar de novo a cada mensagem de quem nao tem
+ * foto nenhuma.
+ */
+async function atualizarFotoDoCliente(
+  admin: SupabaseClient,
+  channel: ChannelRow,
+  customerId: string,
+  telefone: string,
+): Promise<void> {
+  const { data: atual } = await admin
+    .from('customers')
+    .select('photo_checked_at')
+    .eq('id', customerId)
+    .maybeSingle()
+
+  const conferidoEm = atual?.photo_checked_at ? Date.parse(atual.photo_checked_at as string) : 0
+  if (conferidoEm && Date.now() - conferidoEm < VALIDADE_DA_FOTO_MS) return
+
+  const url = await buscarFotoPerfil(channel, telefone)
+  // undefined = nao deu para perguntar. Nao gravamos nada, para tentar de novo
+  // na proxima mensagem em vez de fingir que ja conferimos.
+  if (url === undefined) return
+
+  await admin
+    .from('customers')
+    .update({ photo_url: url, photo_checked_at: new Date().toISOString() })
+    .eq('id', customerId)
+}
 
 /** Localizacao normalizada, igual para Meta e Evolution. */
 export interface InboundLocation {
@@ -85,6 +124,12 @@ export async function ingestInbound(admin: SupabaseClient, input: InboundInput):
   if (customerError || !customer) throw new Error(customerError?.message ?? 'Cliente nao resolvido')
 
   const customerId = (customer as { id: string }).id
+
+  // A foto vai por fora do fluxo: se a Evolution demorar ou recusar, a
+  // mensagem do cliente nao pode ficar esperando por causa de um avatar.
+  atualizarFotoDoCliente(admin, channel, customerId, input.from).catch((erro) => {
+    console.warn('[whatsapp] foto de perfil ignorada', erro)
+  })
 
   // ------------------------------------------------------------ Conversa
   const { data: open } = await admin

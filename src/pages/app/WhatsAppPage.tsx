@@ -4,6 +4,7 @@ import {
   Copy,
   Link2,
   MessageSquare,
+  Pencil,
   Plug,
   PlugZap,
   QrCode,
@@ -277,11 +278,15 @@ function ChannelCard({
         action={
           canManage ? (
             <div className="flex flex-wrap items-center gap-2">
-              {extraActions}
+              {/* "Configurar" não dizia que dá para ALTERAR o que já está lá —
+                  quem queria trocar o número ou a URL não achava a porta de
+                  entrada. Com canal salvo o botão é "Editar", e é o primeiro
+                  da fila. */}
               <Button size="sm" variant="outline" onClick={onConfigure}>
-                <Plug className="size-4" />
-                {channel ? 'Configurar' : 'Conectar'}
+                {channel ? <Pencil className="size-4" /> : <Plug className="size-4" />}
+                {channel ? 'Editar' : 'Conectar'}
               </Button>
+              {extraActions}
               {channel && (
                 <>
                   <Button
@@ -557,6 +562,9 @@ function MetaModal({
 
 /* --------------------------------------------------------- Evolution modal */
 
+/** Digitar isto no campo de senha do webhook apaga a senha guardada. */
+const REMOVER = 'remover'
+
 function EvolutionModal({
   open,
   channel,
@@ -598,6 +606,8 @@ function EvolutionModal({
     if (!form.instance.trim()) return setError('Informe o nome da instância.')
     if (!channel && !form.apiKey.trim()) return setError('Informe a API Key da instância.')
 
+    const segredo = form.webhookSecret.trim()
+
     try {
       await save.mutateAsync({
         provider: 'evolution',
@@ -608,10 +618,12 @@ function EvolutionModal({
           instance: form.instance.trim(),
         },
         // Campo em branco mantém o valor atual — por isso só vai o que foi
-        // digitado agora.
+        // digitado agora. A palavra "remover" é a saída para apagar de vez:
+        // sem ela dava para trocar a senha, nunca para tirá-la, e quem
+        // cadastrou por engano ficava preso com o webhook recusando tudo.
         secrets: {
           api_key: form.apiKey,
-          ...(form.webhookSecret.trim() ? { webhook_secret: form.webhookSecret.trim() } : {}),
+          ...(segredo === REMOVER ? { webhook_secret: '' } : segredo ? { webhook_secret: segredo } : {}),
         },
       })
       onSaved()
@@ -637,7 +649,12 @@ function EvolutionModal({
         </>
       }
     >
-      <form id="evolution-form" onSubmit={submit} className="space-y-4">
+      {/* autoComplete no formulário E nome próprio em cada campo. Sem nome, o
+          navegador adivinha pelo rótulo e enfia o e-mail salvo em "Nome da
+          instância" e a senha do gerenciador no campo de API Key — foi o que
+          aconteceu em produção. Campo de senha ignora autoComplete="off";
+          "new-password" é o que o Chrome respeita. */}
+      <form id="evolution-form" onSubmit={submit} className="space-y-4" autoComplete="off">
         {error && <Alert tone="error">{error}</Alert>}
         {channel?.has_credentials && (
           <Alert tone="info">
@@ -646,6 +663,8 @@ function EvolutionModal({
         )}
         <Field
           label="URL da instância"
+          name="evolution-base-url"
+          autoComplete="off"
           value={form.baseUrl}
           onChange={(e) => setForm((f) => ({ ...f, baseUrl: e.target.value }))}
           placeholder="https://evolution.suaempresa.com.br"
@@ -653,6 +672,8 @@ function EvolutionModal({
         />
         <Field
           label="Nome da instância"
+          name="evolution-instance"
+          autoComplete="off"
           value={form.instance}
           onChange={(e) => setForm((f) => ({ ...f, instance: e.target.value }))}
           placeholder="tecnoar"
@@ -661,13 +682,16 @@ function EvolutionModal({
         <Field
           label="API Key"
           type="password"
-          autoComplete="off"
+          name="evolution-api-key"
+          autoComplete="new-password"
           value={form.apiKey}
           onChange={(e) => setForm((f) => ({ ...f, apiKey: e.target.value }))}
           placeholder={channel?.has_credentials ? 'Manter chave atual' : ''}
         />
         <Field
           label="Número do WhatsApp"
+          name="evolution-phone"
+          autoComplete="off"
           value={form.phoneNumber}
           onChange={(e) => setForm((f) => ({ ...f, phoneNumber: maskPhoneInput(e.target.value) }))}
           placeholder="(11) 98888-7777"
@@ -675,11 +699,16 @@ function EvolutionModal({
         <Field
           label="Senha do webhook (recomendado)"
           type="password"
-          autoComplete="off"
+          name="evolution-webhook-secret"
+          autoComplete="new-password"
           value={form.webhookSecret}
           onChange={(e) => setForm((f) => ({ ...f, webhookSecret: e.target.value }))}
-          placeholder={channel ? 'Manter a senha atual' : 'Invente uma senha longa'}
-          hint="Sem ela, quem descobrir o endereço do webhook consegue enviar mensagem se passando por cliente — e disparar resposta da IA e aviso de emergência. Depois de salvar, cadastre a mesma senha na Evolution como cabeçalho apikey do webhook."
+          placeholder={channel ? 'Manter a senha atual' : 'Opcional'}
+          hint={
+            channel
+              ? 'Em branco mantém a atual. Escreva "remover" para apagá-la.'
+              : 'Opcional. A mesma senha vai no cabeçalho apikey do webhook, na Evolution.'
+          }
         />
       </form>
     </Modal>

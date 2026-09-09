@@ -6,3 +6,4 @@ dist
 .DS_Store
 .env.production
 deploy_key*
+infra/evolution/.env

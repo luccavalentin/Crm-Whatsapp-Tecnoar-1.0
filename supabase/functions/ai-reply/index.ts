@@ -402,6 +402,7 @@ async function executarPasso(
     settings,
     customer: {
       name: customer!.name,
+      whatsapp_name: customer!.whatsapp_name,
       phone: customer!.phone,
       company_name: customer!.company_name,
       isRecurring: (customer!.service_count ?? 0) > 1,
@@ -637,10 +638,14 @@ async function executarPasso(
     }
   }
 
-  // Nome do cliente ainda desconhecido: a IA pode preencher
+  // Nome do cliente ainda desconhecido: a IA preenche com o que a PESSOA
+  // disse. Se ela não disse nada, cai para o nome que ela mesma cadastrou no
+  // WhatsApp — melhor que "Cliente sem nome" na lista, e não é invenção
+  // nossa: é o nome que ela escolheu mostrar.
   const nameField = outcome.customer_fields.find((f) => f.key === 'nome')
-  if (nameField && !customer!.name) {
-    await admin.from('customers').update({ name: nameField.value }).eq('id', customer!.id)
+  const nomeEscolhido = nameField?.value?.trim() || customer!.whatsapp_name?.trim() || null
+  if (nomeEscolhido && !customer!.name) {
+    await admin.from('customers').update({ name: nomeEscolhido }).eq('id', customer!.id)
   }
 
   // ------------------------------------------------------------ Emergência

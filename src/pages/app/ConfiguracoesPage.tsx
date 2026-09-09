@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Bot, Building2, KeyRound, LayoutGrid, MessageSquare, ShieldAlert, ShieldCheck, Tags, User, Users } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Alert, Button, Card, CardHeader, Field } from '@/components/ui'
 import { useAuth } from '@/contexts/AuthContext'
 import { usePermissions } from '@/features/permissions'
@@ -55,7 +55,16 @@ type TabKey = (typeof TABS)[number]['key']
 export function ConfiguracoesPage() {
   const { profile, company, refreshProfile } = useAuth()
   const { can } = usePermissions()
-  const [tab, setTab] = useState<TabKey>('geral')
+  // A aba pode vir pela URL: é o que faz o atalho "criar etiqueta", lá da
+  // conversa, cair direto no lugar certo em vez de na aba geral.
+  const [parametros, setParametros] = useSearchParams()
+  const abaDaUrl = parametros.get('aba') as TabKey | null
+  const [tab, definirTab] = useState<TabKey>(abaDaUrl ?? 'geral')
+
+  const setTab = (nova: TabKey) => {
+    definirTab(nova)
+    setParametros(nova === 'geral' ? {} : { aba: nova }, { replace: true })
+  }
 
   const isAdmin = can('configuracoes.gerenciar')
 

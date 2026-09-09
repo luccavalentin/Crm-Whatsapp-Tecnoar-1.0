@@ -150,7 +150,7 @@ export function ClienteDetalhePage() {
       {/* Cabeçalho do cliente */}
       <Card className="mb-4 p-5">
         <div className="flex flex-wrap items-start gap-4">
-          <Avatar name={nomeCliente} seed={customer.id} size="lg" />
+          <Avatar name={nomeCliente} seed={customer.id} photoUrl={customer.photo_url} size="lg" />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-semibold tracking-tight text-ink">{nomeCliente}</h2>

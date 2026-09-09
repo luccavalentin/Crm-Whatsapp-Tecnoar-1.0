@@ -32,6 +32,7 @@ export function Avatar({
   seed,
   size = 'md',
   tone,
+  photoUrl,
   className,
 }: {
   name: string
@@ -40,6 +41,8 @@ export function Avatar({
   size?: keyof typeof SIZES
   /** Sobrescreve a cor — usado em emergências, por exemplo. */
   tone?: 'danger' | 'navy'
+  /** Foto de perfil do WhatsApp, quando o cliente tem uma. */
+  photoUrl?: string | null
   className?: string
 }) {
   const toneClass =
@@ -49,17 +52,35 @@ export function Avatar({
         ? 'bg-navy-900 text-white'
         : toneFor(seed ?? name)
 
+  const base = cn(
+    'flex shrink-0 select-none items-center justify-center font-semibold tracking-tight',
+    'shadow-[var(--shadow-card)] ring-1 ring-inset ring-ink/[0.06]',
+    SIZES[size],
+    className,
+  )
+
+  // A URL da foto vem do WhatsApp e expira sozinha. Quando ela falha, o
+  // navegador esconde a imagem e as iniciais atrás dela continuam à mostra —
+  // por isso o fundo colorido fica no contêiner, e não na imagem.
+  if (photoUrl) {
+    return (
+      <span aria-hidden className={cn(base, toneClass, 'relative overflow-hidden')}>
+        {initials(name)}
+        <img
+          src={photoUrl}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 size-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none'
+          }}
+        />
+      </span>
+    )
+  }
+
   return (
-    <span
-      aria-hidden
-      className={cn(
-        'flex shrink-0 select-none items-center justify-center font-semibold tracking-tight',
-        'shadow-[var(--shadow-card)] ring-1 ring-inset ring-ink/[0.06]',
-        SIZES[size],
-        toneClass,
-        className,
-      )}
-    >
+    <span aria-hidden className={cn(base, toneClass)}>
       {initials(name)}
     </span>
   )

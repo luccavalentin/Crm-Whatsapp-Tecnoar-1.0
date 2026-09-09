@@ -29,13 +29,74 @@ import type { ConversationPriority, ConversationStatus } from '@/types/database'
 
 type ColumnKey = ConversationStatus | 'emergencia'
 
-const COLUMNS: Array<{ key: ColumnKey; label: string; hint: string }> = [
-  { key: 'novo', label: 'Novos', hint: 'Chegaram e ainda não foram tratados' },
-  { key: 'ia', label: 'IA', hint: 'Sendo atendidos pela inteligência artificial' },
-  { key: 'aguardando_humano', label: 'Aguardando humano', hint: 'Precisam de um atendente' },
-  { key: 'em_atendimento', label: 'Em atendimento', hint: 'Com atendente responsável' },
-  { key: 'emergencia', label: 'Emergência', hint: 'Prioridade máxima' },
-  { key: 'concluido', label: 'Concluídos', hint: 'Encerrados' },
+/**
+ * As etapas do fluxo.
+ *
+ * `vazio` não é decoração: coluna vazia é a única chance de explicar para que
+ * ela serve. Antes as seis repetiam "Sem cards nesta etapa — o fluxo permanece
+ * limpo", que não ensina nada e ainda deixa a tela parecendo quebrada. Agora
+ * cada uma diz o que cai ali e o que fazer com o que cair.
+ */
+const COLUMNS: Array<{
+  key: ColumnKey
+  label: string
+  hint: string
+  vazio: { titulo: string; texto: string }
+}> = [
+  {
+    key: 'novo',
+    label: 'Novos',
+    hint: 'Chegaram e ainda não foram tratados',
+    vazio: {
+      titulo: 'Nenhum contato novo',
+      texto: 'Quem manda mensagem pela primeira vez entra aqui, antes de a IA ou alguém da equipe assumir.',
+    },
+  },
+  {
+    key: 'ia',
+    label: 'IA',
+    hint: 'Sendo atendidos pela inteligência artificial',
+    vazio: {
+      titulo: 'A IA não está conduzindo nenhum',
+      texto: 'Aqui ficam os atendimentos que a IA está tocando sozinha. Ela sai daqui quando resolve ou quando chama alguém.',
+    },
+  },
+  {
+    key: 'aguardando_humano',
+    label: 'Aguardando humano',
+    hint: 'Precisam de um atendente',
+    vazio: {
+      titulo: 'Ninguém esperando',
+      texto: 'A IA move para cá o que não soube resolver. É a fila que a equipe precisa olhar primeiro.',
+    },
+  },
+  {
+    key: 'em_atendimento',
+    label: 'Em atendimento',
+    hint: 'Com atendente responsável',
+    vazio: {
+      titulo: 'Nenhum atendimento assumido',
+      texto: 'Quando alguém clica em "Assumir", o atendimento vem para cá com o nome do responsável.',
+    },
+  },
+  {
+    key: 'emergencia',
+    label: 'Emergência',
+    hint: 'Prioridade máxima',
+    vazio: {
+      titulo: 'Nenhuma emergência agora',
+      texto: 'Caminhão parado, freio falhando, pedido de socorro. Aparecendo aqui, larga o resto.',
+    },
+  },
+  {
+    key: 'concluido',
+    label: 'Concluídos',
+    hint: 'Encerrados',
+    vazio: {
+      titulo: 'Nada encerrado no período',
+      texto: 'Atendimentos finalizados ficam aqui como histórico. O cliente pode reabrir mandando mensagem.',
+    },
+  },
 ]
 
 const COLUMN_THEME = {
@@ -373,9 +434,9 @@ export function KanbanPage() {
                       )}
                     >
                       <Icon className="mb-2 size-5 opacity-70" />
-                      <p className="text-xs font-semibold">Sem cards nesta etapa</p>
-                      <p className="mt-1 text-2xs leading-snug opacity-75">
-                        O fluxo permanece limpo até um atendimento chegar aqui.
+                      <p className="text-xs font-semibold">{column.vazio.titulo}</p>
+                      <p className="mt-1 max-w-[30ch] text-2xs leading-snug opacity-75">
+                        {column.vazio.texto}
                       </p>
                     </div>
                   ) : (
@@ -471,6 +532,7 @@ function CardConversa({
           <Avatar
             name={nome}
             seed={conversation.customer?.id ?? conversation.id}
+            photoUrl={conversation.customer?.photo_url}
             size="sm"
             tone={emergencia ? 'danger' : undefined}
           />

@@ -396,6 +396,7 @@ function ConversationListItem({
             <Avatar
               name={name}
               seed={customer?.id ?? conversation.id}
+              photoUrl={customer?.photo_url}
               tone={isEmergency && !closed ? 'danger' : undefined}
               className={cn(active && 'ring-orange-500/20')}
             />
@@ -586,7 +587,7 @@ function ConversationView({
     <>
       {/* Coluna 2 — chat */}
       <section className="chat-surface flex min-w-0 flex-1 flex-col">
-        <header className="flex min-h-[72px] items-center gap-3 border-b border-line/80 bg-surface/[0.92] px-4 py-3 shadow-[var(--shadow-edge-bottom)] backdrop-blur-xl">
+        <header className="relative z-20 flex min-h-[72px] items-center gap-3 border-b border-line/80 bg-surface/[0.92] px-4 py-3 shadow-[var(--shadow-edge-bottom)] backdrop-blur-xl">
           <button
             type="button"
             onClick={onBack}
@@ -599,6 +600,7 @@ function ConversationView({
             <Avatar
               name={customerName}
               seed={conversation.customer?.id ?? conversation.id}
+              photoUrl={conversation.customer?.photo_url}
               className="size-10 rounded-xl"
             />
             <span
@@ -1773,6 +1775,7 @@ function NewConversationModal({
                         <Avatar
                           name={displayName(customer.name || customer.whatsapp_name)}
                           seed={customer.id}
+                          photoUrl={customer.photo_url}
                           size="sm"
                         />
                         <span className="min-w-0">

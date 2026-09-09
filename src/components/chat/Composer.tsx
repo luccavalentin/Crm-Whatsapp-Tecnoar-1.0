@@ -216,7 +216,7 @@ export function Composer({
 
   if (recording) {
     return (
-      <div className="flex items-center gap-3 border-t border-line/80 bg-surface/[0.92] px-4 py-3 pb-safe-3 backdrop-blur sm:pb-3">
+      <div className="relative z-20 flex items-center gap-3 border-t border-line/80 bg-surface/[0.92] px-4 py-3 pb-safe-3 backdrop-blur sm:pb-3">
         <span className="flex size-9 items-center justify-center rounded-xl bg-red-50">
           <span className="size-2.5 animate-pulse rounded-full bg-red-600" />
         </span>
@@ -243,7 +243,7 @@ export function Composer({
   return (
     <form
       onSubmit={submit}
-      className="border-t border-line/80 bg-surface/[0.94] px-4 py-3 pb-safe-3 shadow-[var(--shadow-edge-top)] backdrop-blur sm:px-5 sm:pb-3"
+      className="relative z-20 border-t border-line/80 bg-surface/[0.94] px-4 py-3 pb-safe-3 shadow-[var(--shadow-edge-top)] backdrop-blur sm:px-5 sm:pb-3"
     >
       {replyTo && (
         <div className="mb-2 flex items-stretch gap-2.5 rounded-xl bg-cyan-100/[0.35] p-2.5 ring-1 ring-cyan-500/15">

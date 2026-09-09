@@ -24,12 +24,15 @@ export type InboxFilter =
   | 'arquivados'
 
 export interface ConversationWithRelations extends ConversationRow {
-  customer: Pick<CustomerRow, 'id' | 'name' | 'phone' | 'whatsapp_name' | 'company_name'> | null
+  customer: Pick<
+    CustomerRow,
+    'id' | 'name' | 'phone' | 'whatsapp_name' | 'company_name' | 'photo_url'
+  > | null
   assignee: Pick<ProfileRow, 'id' | 'full_name'> | null
 }
 
 const SELECT_CONVERSATION =
-  '*, customer:customers!conversations_customer_id_fkey(id, name, phone, whatsapp_name, company_name),' +
+  '*, customer:customers!conversations_customer_id_fkey(id, name, phone, whatsapp_name, company_name, photo_url),' +
   ' assignee:profiles!conversations_assigned_to_fkey(id, full_name)'
 
 /* ------------------------------------------------------------------ Lista */

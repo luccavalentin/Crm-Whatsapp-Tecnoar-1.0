@@ -3,6 +3,6 @@ dist
 .git
 .env
 .env.local
-.claude
+.env.production
 supabase/functions
 *.log
